@@ -1,7 +1,7 @@
 # python-keyword-combo
 
 An indicator that makes combo of written Python keywords 
-[alt image](https://raw.githubusercontent.com/bulochka-reborn/python-keyword-combo/4a2811b7ff761ffce89d6b8313136b384aab9c3c/demonstration.gif)
+![alt image](https://raw.githubusercontent.com/bulochka-reborn/python-keyword-combo/4a2811b7ff761ffce89d6b8313136b384aab9c3c/demonstration.gif)
 
 ## Table of contents
 
