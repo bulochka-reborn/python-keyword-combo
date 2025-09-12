@@ -4,3 +4,4 @@ CC = gcc
 
 main.out: main.c
 	$(CC) $(CFLAGS) main.c -o main.out $(LDFLAGS)
+	rm keywords.py

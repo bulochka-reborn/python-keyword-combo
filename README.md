@@ -18,7 +18,7 @@ In the directory with main.c and Makefile use:
 ```sh
 $ make
 ```
-Ready to use file will be named main.out.
+Ready to use file will be named "main.out".
 
 ## Usage
 
@@ -27,6 +27,8 @@ In the directory with main.c and Makefile use:
 ```sh
 $ ./main.out -x window_pos_x -y window_pos_y
 ```
+
+Start with Caps Lock turned off (will be improved in the future)
 
 ## Dependencies
 
@@ -39,7 +41,7 @@ $ ./main.out -x window_pos_x -y window_pos_y
 
 - [ ] Add proper command line argunents handling
 - [ ] Add auto positioning
-- [ ] Add language and Caps Lock tracking
+- [ ] Add language tracking
 - [ ] Add more keywords and functions
 - [ ] Delete keywords and functions like "if", "id" etc.
 
