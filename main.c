@@ -268,19 +268,36 @@ int main(int argc, char *argv[]) {
     int pos_y = 0;
     float line_spacing_multiplier = 0.5;
     int border_width = 1;
+    int autopos_corner = 0;
 
     int max_non_combo_word_to_interrupt = 3;
 
     // ---------------------------getting arguments--------------------------------
     int opt;
 
-    while ((opt = getopt(argc, argv, "x:y:")) != -1) {
+    static struct option long_options[] =
+    {
+        {"autopos", required_argument, NULL, 'a'},
+        {"x_pos", required_argument, NULL, 'x'},
+        {"y_pos", required_argument, NULL, 'y'},
+        {"nocltrack", no_argument, NULL, 'n'},
+        {"border", required_argument, NULL, 'b'},
+        {NULL, 0, NULL, 0}
+    };
+
+    while ((opt = getopt_long(argc, argv, "x:y:a:b:n")) != -1) {
         switch (opt) {
             case 'x':
                 pos_x = atoi(optarg);
                 break;
             case 'y':
                 pos_y = atoi(optarg);
+                break;
+            case 'a':
+                autopos_corner = atoi(optarg);
+                break;
+            case 'b':
+                border_width = atoi(optarg);
                 break;
         }
   }
