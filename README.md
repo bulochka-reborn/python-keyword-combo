@@ -40,10 +40,10 @@ Start with Caps Lock turned off (will be improved in the future)
 
 ## To do
 
-- [ ] Add proper command line argunents handling
-- [ ] Add auto positioning
+- [ ] Add more arguments
+- [ ] Write normal README.md
 - [ ] Add language tracking
-- [ ] Add more keywords and functions
+- [ ] Add more keywords, functions and methods
 - [ ] Delete keywords and functions like "if", "id" etc.
 
 ## Thanks

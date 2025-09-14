@@ -26,6 +26,13 @@ typedef struct Hints
 
 
 
+void invalid_option_exit() {
+    printf("Invalid options. Exiting the program. \n");
+    exit(1);
+}
+
+
+
 void add_new_combo_string_to_end(int len_string, int num_strings, char strings[num_strings][len_string], char *user_and_hostname, int combo) {
     char buff[len_string];
 
@@ -293,20 +300,38 @@ int main(int argc, char *argv[]) {
             case 'x':
                 pos_x = atoi(optarg);
                 break;
+
             case 'y':
                 pos_y = atoi(optarg);
                 break;
+
             case 'a':
                 autopos_corner = atoi(optarg);
                 break;
+
             case 'b':
                 border_width = atoi(optarg);
                 break;
+
             case 'n':
                 caps_lock_tracking = 0;
                 break;
+
+            case ':': 
+                invalid_option_exit();
+
+            case '?':
+                invalid_option_exit();
+
+            default:
+                invalid_option_exit();
+
         }
-  }
+    }
+
+    if (optind < argc) {
+        invalid_option_exit();
+    }
 
     // ---------------------------setup window--------------------------------
 
@@ -348,7 +373,7 @@ int main(int argc, char *argv[]) {
                 break;
 
             default:
-                break;
+                invalid_option_exit();
         }
     }
 
