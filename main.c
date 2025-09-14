@@ -71,6 +71,7 @@ char *get_user_and_hostname(void) {
 }
 
 
+
 char all_true(char arr[77]) {
     for (int counter = 0; counter < 77; counter++) {
         if (arr[counter] == 0) {
@@ -97,7 +98,6 @@ char handle_keywords(char letter, char keywords[77][13], char status[77], char i
     for (char counter = 0; counter < 77; counter++) {
         if (keywords[counter][status[counter]] == letter) {
             if (keywords[counter][status[counter] + 1] == '\0') {
-                printf(" this is a test %s\n", keywords[counter]);
                 memset(status, 0, 77);
                 memset(inconsistency, 0, 77);
                 return 2;
@@ -269,6 +269,9 @@ int main(int argc, char *argv[]) {
     float line_spacing_multiplier = 0.5;
     int border_width = 1;
     int autopos_corner = 0;
+    int autopos_from_side = 50;
+    int autopos_from_top_bottom = 50;
+    int caps_lock_tracking = 1;
 
     int max_non_combo_word_to_interrupt = 3;
 
@@ -285,7 +288,7 @@ int main(int argc, char *argv[]) {
         {NULL, 0, NULL, 0}
     };
 
-    while ((opt = getopt_long(argc, argv, "x:y:a:b:n")) != -1) {
+    while ((opt = getopt_long(argc, argv, "x:y:a:b:n", long_options, NULL)) != -1) {
         switch (opt) {
             case 'x':
                 pos_x = atoi(optarg);
@@ -298,6 +301,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'b':
                 border_width = atoi(optarg);
+                break;
+            case 'n':
+                caps_lock_tracking = 0;
                 break;
         }
   }
@@ -315,6 +321,36 @@ int main(int argc, char *argv[]) {
 
     int screen;
     screen = DefaultScreen(display);
+
+    if (autopos_corner) {
+        int screen_width = DisplayWidth(display, screen);
+        int screen_height = DisplayHeight(display, screen);
+
+        switch (autopos_corner) {
+            case 1:
+                pos_x = 0 + autopos_from_side;
+                pos_y = 0 + autopos_from_top_bottom;
+                break;
+
+            case 2:
+                pos_x = screen_width - autopos_from_side - combo_window_size_x;
+                pos_y = 0 + autopos_from_top_bottom;
+                break;
+            
+            case 3:
+                pos_x = 0 + autopos_from_side;
+                pos_y = screen_height - autopos_from_top_bottom - combo_window_size_y;
+                break;
+            
+            case 4:
+                pos_x = screen_width - autopos_from_side - combo_window_size_x;;
+                pos_y = screen_height - autopos_from_top_bottom - combo_window_size_y;
+                break;
+
+            default:
+                break;
+        }
+    }
 
     XSetWindowAttributes attrs;
     attrs.override_redirect = True;
@@ -403,11 +439,13 @@ int main(int argc, char *argv[]) {
                 keycode = libinput_event_keyboard_get_key(keyboard_event);
 
                 if (keycode == 58) { // caps lock
-                    if (libinput_event_keyboard_get_key_state(keyboard_event) == LIBINPUT_KEY_STATE_PRESSED) {
-                        if (caps_lock) {
-                            caps_lock = 0;
-                        } else {
-                            caps_lock = 1;
+                    if (caps_lock_tracking) {
+                        if (libinput_event_keyboard_get_key_state(keyboard_event) == LIBINPUT_KEY_STATE_PRESSED) {
+                            if (caps_lock) {
+                                caps_lock = 0;
+                            } else {
+                                caps_lock = 1;
+                            }
                         }
                     }
 

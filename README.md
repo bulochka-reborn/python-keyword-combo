@@ -36,6 +36,7 @@ Start with Caps Lock turned off (will be improved in the future)
 - libudev
 - libinput
 - libxft
+- freetype2
 
 ## To do
 
