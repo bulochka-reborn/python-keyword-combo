@@ -26,6 +26,13 @@ typedef struct Hints
 
 
 
+void invalid_option_exit() {
+    printf("Invalid options. Exiting the program. \n");
+    exit(1);
+}
+
+
+
 void add_new_combo_string_to_end(int len_string, int num_strings, char strings[num_strings][len_string], char *user_and_hostname, int combo) {
     char buff[len_string];
 
@@ -71,6 +78,7 @@ char *get_user_and_hostname(void) {
 }
 
 
+
 char all_true(char arr[77]) {
     for (int counter = 0; counter < 77; counter++) {
         if (arr[counter] == 0) {
@@ -97,7 +105,6 @@ char handle_keywords(char letter, char keywords[77][13], char status[77], char i
     for (char counter = 0; counter < 77; counter++) {
         if (keywords[counter][status[counter]] == letter) {
             if (keywords[counter][status[counter] + 1] == '\0') {
-                printf(" this is a test %s\n", keywords[counter]);
                 memset(status, 0, 77);
                 memset(inconsistency, 0, 77);
                 return 2;
@@ -172,10 +179,46 @@ char convert_to_ascii(uint32_t key) {
         case 48: return 98; // n
         case 49: return 110; // n
         case 50: return 109; // m
-        default: return 0; // null
+        default: return 0;
     }
 }
- 
+
+
+
+char capitalized_convert_to_ascii(uint32_t key) {
+    switch (key) { // too lazy to add _ . sometime later maybe
+        case 16: return 81;  // Q
+        case 17: return 87;  // W
+        case 18: return 69;  // E
+        case 19: return 82;  // R
+        case 20: return 84;  // T
+        case 21: return 89;  // Y
+        case 22: return 85;  // U
+        case 23: return 73;  // I
+        case 24: return 79;  // O
+        case 25: return 80;  // P
+        case 30: return 65;  // A
+        case 31: return 83;  // S
+        case 32: return 68;  // D
+        case 33: return 70;  // F
+        case 34: return 71;  // G
+        case 35: return 72;  // H
+        case 36: return 74;  // J
+        case 37: return 75;  // K
+        case 38: return 76;  // L
+        case 44: return 90;  // Z
+        case 45: return 88;  // X
+        case 46: return 67;  // C
+        case 47: return 86;  // V
+        case 48: return 66;  // B
+        case 49: return 78;  // N
+        case 50: return 77;  // M
+        default: return 0;
+    }
+}
+
+
+
 void shake_window(Display *display, Window *window, int pos_x, int pos_y) {
     int offsets[][2] = {{-5, 5}, {0, 0}, {5, -5}, {0, 0}, {5, 5}, {0, 0}, {-5, -5}, {0, 0}};
 
@@ -232,22 +275,63 @@ int main(int argc, char *argv[]) {
     int pos_y = 0;
     float line_spacing_multiplier = 0.5;
     int border_width = 1;
+    int autopos_corner = 0;
+    int autopos_from_side = 50;
+    int autopos_from_top_bottom = 50;
+    int caps_lock_tracking = 1;
 
     int max_non_combo_word_to_interrupt = 3;
 
     // ---------------------------getting arguments--------------------------------
     int opt;
 
-    while ((opt = getopt(argc, argv, "x:y:")) != -1) {
+    static struct option long_options[] =
+    {
+        {"autopos", required_argument, NULL, 'a'},
+        {"x_pos", required_argument, NULL, 'x'},
+        {"y_pos", required_argument, NULL, 'y'},
+        {"nocltrack", no_argument, NULL, 'n'},
+        {"border", required_argument, NULL, 'b'},
+        {NULL, 0, NULL, 0}
+    };
+
+    while ((opt = getopt_long(argc, argv, "x:y:a:b:n", long_options, NULL)) != -1) {
         switch (opt) {
             case 'x':
                 pos_x = atoi(optarg);
                 break;
+
             case 'y':
                 pos_y = atoi(optarg);
                 break;
+
+            case 'a':
+                autopos_corner = atoi(optarg);
+                break;
+
+            case 'b':
+                border_width = atoi(optarg);
+                break;
+
+            case 'n':
+                caps_lock_tracking = 0;
+                break;
+
+            case ':': 
+                invalid_option_exit();
+
+            case '?':
+                invalid_option_exit();
+
+            default:
+                invalid_option_exit();
+
         }
-  }
+    }
+
+    if (optind < argc) {
+        invalid_option_exit();
+    }
 
     // ---------------------------setup window--------------------------------
 
@@ -262,6 +346,36 @@ int main(int argc, char *argv[]) {
 
     int screen;
     screen = DefaultScreen(display);
+
+    if (autopos_corner) {
+        int screen_width = DisplayWidth(display, screen);
+        int screen_height = DisplayHeight(display, screen);
+
+        switch (autopos_corner) {
+            case 1:
+                pos_x = 0 + autopos_from_side;
+                pos_y = 0 + autopos_from_top_bottom;
+                break;
+
+            case 2:
+                pos_x = screen_width - autopos_from_side - combo_window_size_x;
+                pos_y = 0 + autopos_from_top_bottom;
+                break;
+            
+            case 3:
+                pos_x = 0 + autopos_from_side;
+                pos_y = screen_height - autopos_from_top_bottom - combo_window_size_y;
+                break;
+            
+            case 4:
+                pos_x = screen_width - autopos_from_side - combo_window_size_x;;
+                pos_y = screen_height - autopos_from_top_bottom - combo_window_size_y;
+                break;
+
+            default:
+                invalid_option_exit();
+        }
+    }
 
     XSetWindowAttributes attrs;
     attrs.override_redirect = True;
@@ -319,6 +433,7 @@ int main(int argc, char *argv[]) {
 
     uint32_t keycode;
     char key_ascii;
+    char caps_lock = 0;
 
     char keywords[77][13] = {{'a', 'b', 's', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'a', 'l', 'l', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'a', 'n', 'y', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'a', 's', 'c', 'i', 'i', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'b', 'i', 'n', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'b', 'r', 'e', 'a', 'k', 'p', 'o', 'i', 'n', 't', '\0', '\0', '\0'}, {'c', 'a', 'l', 'l', 'a', 'b', 'l', 'e', '\0', '\0', '\0', '\0', '\0'}, {'c', 'h', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'c', 'o', 'm', 'p', 'i', 'l', 'e', '\0', '\0', '\0', '\0', '\0', '\0'}, {'d', 'e', 'l', 'a', 't', 't', 'r', '\0', '\0', '\0', '\0', '\0', '\0'}, {'d', 'i', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'d', 'i', 'v', 'm', 'o', 'd', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'e', 'v', 'a', 'l', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'e', 'x', 'e', 'c', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'f', 'o', 'r', 'm', 'a', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'g', 'e', 't', 'a', 't', 't', 'r', '\0', '\0', '\0', '\0', '\0', '\0'}, {'g', 'l', 'o', 'b', 'a', 'l', 's', '\0', '\0', '\0', '\0', '\0', '\0'}, {'h', 'a', 's', 'a', 't', 't', 'r', '\0', '\0', '\0', '\0', '\0', '\0'}, {'h', 'a', 's', 'h', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'h', 'e', 'x', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'i', 'd', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'i', 'n', 'p', 'u', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'i', 's', 'i', 'n', 's', 't', 'a', 'n', 'c', 'e', '\0', '\0', '\0'}, {'i', 's', 's', 'u', 'b', 'c', 'l', 'a', 's', 's', '\0', '\0', '\0'}, {'i', 't', 'e', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'a', 'i', 't', 'e', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'l', 'e', 'n', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'l', 'o', 'c', 'a', 'l', 's', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'m', 'a', 'x', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'m', 'i', 'n', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'n', 'e', 'x', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'a', 'n', 'e', 'x', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'o', 'c', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'o', 'r', 'd', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'p', 'o', 'w', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'p', 'r', 'i', 'n', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'r', 'e', 'p', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'r', 'o', 'u', 'n', 'd', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 'e', 't', 'a', 't', 't', 'r', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 'o', 'r', 't', 'e', 'd', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 'u', 'm', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'v', 'a', 'r', 's', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'b', 'o', 'o', 'l', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'m', 'e', 'm', 'o', 'r', 'y', 'v', 'i', 'e', 'w', '\0', '\0', '\0'}, {'b', 'y', 't', 'e', 'a', 'r', 'r', 'a', 'y', '\0', '\0', '\0', '\0'}, {'b', 'y', 't', 'e', 's', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'c', 'l', 'a', 's', 's', 'm', 'e', 't', 'h', 'o', 'd', '\0', '\0'}, {'c', 'o', 'm', 'p', 'l', 'e', 'x', '\0', '\0', '\0', '\0', '\0', '\0'}, {'d', 'i', 'c', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'e', 'n', 'u', 'm', 'e', 'r', 'a', 't', 'e', '\0', '\0', '\0', '\0'}, {'f', 'i', 'l', 't', 'e', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'f', 'l', 'o', 'a', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'f', 'r', 'o', 'z', 'e', 'n', 's', 'e', 't', '\0', '\0', '\0', '\0'}, {'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', '\0', '\0', '\0', '\0', '\0'}, {'i', 'n', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'l', 'i', 's', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'m', 'a', 'p', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'o', 'b', 'j', 'e', 'c', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'r', 'a', 'n', 'g', 'e', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'r', 'e', 'v', 'e', 'r', 's', 'e', 'd', '\0', '\0', '\0', '\0', '\0'}, {'s', 'e', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 'l', 'i', 'c', 'e', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 't', 'a', 't', 'i', 'c', 'm', 'e', 't', 'h', 'o', 'd', '\0'}, {'s', 't', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'s', 'u', 'p', 'e', 'r', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'t', 'u', 'p', 'l', 'e', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'t', 'y', 'p', 'e', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'z', 'i', 'p', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'o', 'p', 'e', 'n', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'q', 'u', 'i', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'e', 'x', 'i', 't', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'c', 'o', 'p', 'y', 'r', 'i', 'g', 'h', 't', '\0', '\0', '\0', '\0'}, {'c', 'r', 'e', 'd', 'i', 't', 's', '\0', '\0', '\0', '\0', '\0', '\0'}, {'l', 'i', 'c', 'e', 'n', 's', 'e', '\0', '\0', '\0', '\0', '\0', '\0'}, {'h', 'e', 'l', 'p', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}, {'e', 'x', 'e', 'c', 'f', 'i', 'l', 'e', '\0', '\0', '\0', '\0', '\0'}, {'r', 'u', 'n', 'f', 'i', 'l', 'e', '\0', '\0', '\0', '\0', '\0', '\0'}};
     char status_keywords[77] = {0};
@@ -346,10 +461,25 @@ int main(int argc, char *argv[]) {
             if (libinput_event_get_type(event) == LIBINPUT_EVENT_KEYBOARD_KEY) {
                 keyboard_event = libinput_event_get_keyboard_event(event);
 
-                if (libinput_event_keyboard_get_key_state(keyboard_event) == LIBINPUT_KEY_STATE_RELEASED) {
-                    keycode = libinput_event_keyboard_get_key(keyboard_event);
-                    key_ascii = convert_to_ascii(keycode);
+                keycode = libinput_event_keyboard_get_key(keyboard_event);
 
+                if (keycode == 58) { // caps lock
+                    if (caps_lock_tracking) {
+                        if (libinput_event_keyboard_get_key_state(keyboard_event) == LIBINPUT_KEY_STATE_PRESSED) {
+                            if (caps_lock) {
+                                caps_lock = 0;
+                            } else {
+                                caps_lock = 1;
+                            }
+                        }
+                    }
+
+                } else if (libinput_event_keyboard_get_key_state(keyboard_event) == LIBINPUT_KEY_STATE_RELEASED) {
+                    if (caps_lock) {
+                        key_ascii = capitalized_convert_to_ascii(keycode);
+                    } else {
+                        key_ascii = convert_to_ascii(keycode);
+                    }
                     if (key_ascii != 0) {
                         complete_combo = handle_keywords(key_ascii, keywords, status_keywords, inconsistency);
 

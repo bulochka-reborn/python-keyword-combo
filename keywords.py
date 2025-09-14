@@ -29,6 +29,3 @@ for word in all_words:
 
 
 printsl("}")
-
-    
-
