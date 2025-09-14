@@ -292,10 +292,12 @@ int main(int argc, char *argv[]) {
         {"y_pos", required_argument, NULL, 'y'},
         {"nocltrack", no_argument, NULL, 'n'},
         {"border", required_argument, NULL, 'b'},
+        {"width", required_argument, NULL, 'w'},
+        {"height", required_argument, NULL, 'h'},
         {NULL, 0, NULL, 0}
     };
 
-    while ((opt = getopt_long(argc, argv, "x:y:a:b:n", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "w:h:x:y:a:b:n", long_options, NULL)) != -1) {
         switch (opt) {
             case 'x':
                 pos_x = atoi(optarg);
@@ -315,6 +317,14 @@ int main(int argc, char *argv[]) {
 
             case 'n':
                 caps_lock_tracking = 0;
+                break;
+            
+            case 'w':
+                combo_window_size_x = atoi(optarg);
+                break;
+
+            case 'h':
+                combo_window_size_y = atoi(optarg);
                 break;
 
             case ':': 

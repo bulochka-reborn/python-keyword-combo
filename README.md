@@ -22,13 +22,40 @@ Ready to use file will be named "main.out".
 
 ## Usage
 
-In the directory with main.c and Makefile use:
-
+Usage: 
 ```sh
-$ ./main.out -x window_pos_x -y window_pos_y
+$ ./main.out
+```
+Start with Caps Lock turned off (will be improved in the future)
+
+To specify window`s position:
+```sh
+$ ./main.out -x pos_x -y pos_y
 ```
 
-Start with Caps Lock turned off (will be improved in the future)
+To use autopositioning:
+```sh
+$ ./main.out -a corner_num
+```
+corner_num = 1 - upper right corner
+corner_num = 2 - upper left corner
+corner_num = 3 - lower right corner
+corner_num = 4 - lower left corner
+
+To specify window`s width and height:
+```sh
+$ ./main.out -w width -h height
+```
+
+To disable Caps Lock tracking:
+```sh
+$ ./main.out -n
+```
+
+To specify border width:
+```sh
+$ ./main.out -b border_width
+```
 
 ## Dependencies
 
