@@ -54,7 +54,7 @@ $ ./main.out -c
 
 To disable Shift tracking:
 ```sh
-$ ./main.out -c
+$ ./main.out -s
 ```
 
 To specify border width:
