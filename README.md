@@ -49,7 +49,12 @@ $ ./main.out -w width -h height
 
 To disable Caps Lock tracking:
 ```sh
-$ ./main.out -n
+$ ./main.out -c
+```
+
+To disable Shift tracking:
+```sh
+$ ./main.out -c
 ```
 
 To specify border width:
@@ -67,8 +72,6 @@ $ ./main.out -b border_width
 
 ## To do
 
-- [ ] Add more arguments
-- [ ] Write normal README.md
 - [ ] Add language tracking
 - [ ] Add more keywords, functions and methods
 - [ ] Delete keywords and functions like "if", "id" etc.

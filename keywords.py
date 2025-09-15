@@ -1,13 +1,26 @@
 import builtins
 import keyword
+import inspect
 import json
 
 
 def printsl(st):
     print(st, end="")
 
-all_words = [k for k, v in vars(builtins).items() if k[0].islower()]
 
+all_words = []
+
+for obj_str, obj in vars(builtins).items():
+    if not obj_str in all_words:
+        all_words.append(obj_str)
+
+    for attr_str in dir(obj):
+        if not attr_str in all_words:
+            all_words.append(attr_str)
+
+word_ln = [len(i) for i in all_words]
+
+print(max(word_ln))
 
 printsl("{")
 for word in all_words:
