@@ -72,8 +72,6 @@ $ ./main.out -b border_width
 
 ## To do
 
-- [ ] Add language tracking
-- [ ] Add more keywords, functions and methods
 - [ ] Delete keywords and functions like "if", "id" etc.
 
 ## Thanks
